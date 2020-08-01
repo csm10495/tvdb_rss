@@ -91,18 +91,24 @@ class TVDBClient:
         )
         return e
 
-    def get_show_info(self, show_name):
-        result = self._request('get', f'{API_ROOT}/search/series', params={
-            'name' : show_name
-        })
-
-        db_show_info = result.json()['data'][0]
+    def _db_series_to_show_info(self, db_show_info):
         return ShowInfo(
             show_name=db_show_info['seriesName'],
             show_id=str(db_show_info['id']),
             info_link=f'https://www.thetvdb.com/series/{db_show_info["slug"]}',
             image_link=f'https://artworks.thetvdb.com{db_show_info["poster"]}',
         )
+
+    def get_shows_info(self, show_name):
+        result = self._request('get', f'{API_ROOT}/search/series', params={
+            'name' : show_name
+        })
+
+        db_show_info = result.json()['data']
+        return [self._db_series_to_show_info(a) for a in db_show_info]
+
+    def get_show_info(self, show_name):
+        return self.get_shows_info(show_name)[0]
 
     def get_all_episodes(self, show_name):
         show_info = self.get_show_info(show_name)
