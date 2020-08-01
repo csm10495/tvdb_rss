@@ -42,6 +42,7 @@ class RSSGenerator:
             fe.link(href=episode_info.info_link)
             fe.title(episode_info.to_show_episode_string())
             fe.summary(episode_info.episode_description)
+            fe.pubDate(episode_info.first_aired)
 
             image_html = f'<img src="{episode_info.get_available_image()}" title="{episode_info.episode_description}"/>'
             fe.description(image_html)
