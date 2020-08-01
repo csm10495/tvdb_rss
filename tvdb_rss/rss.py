@@ -1,4 +1,5 @@
 import datetime
+import multiprocessing.dummy
 from .setup_logger import getLogger
 
 from feedgen.feed import FeedGenerator
@@ -12,7 +13,7 @@ class RSSGenerator:
 
     def get_episodes_info(self, date=None, max_days_back=14):
         if date is None:
-            date = datetime.datetime.today().replace(tzinfo=datetime.timezone.utc)
+            date = datetime.datetime.today()
 
         shows_list = self.config.get_shows_list()
 
@@ -42,18 +43,9 @@ class RSSGenerator:
             fe.link(href=episode_info.info_link)
             fe.title(episode_info.to_show_episode_string())
             fe.summary(episode_info.episode_description)
-            fe.pubDate(episode_info.first_aired)
+            fe.pubDate(episode_info.first_aired.replace(tzinfo=datetime.timezone.utc))
 
             image_html = f'<img src="{episode_info.get_available_image()}" title="{episode_info.episode_description}"/>'
             fe.description(image_html)
 
         return fg.rss_str(pretty=True).decode()
-
-
-
-
-
-
-
-
-
