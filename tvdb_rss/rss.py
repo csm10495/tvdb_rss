@@ -12,7 +12,7 @@ class RSSGenerator:
 
     def get_episodes_info(self, date=None, max_days_back=14):
         if date is None:
-            date = datetime.datetime.today()
+            date = datetime.datetime.today().replace(tzinfo=datetime.timezone.utc)
 
         shows_list = self.config.get_shows_list()
 
