@@ -127,6 +127,7 @@ class TVDBClient:
             # 404 means nothing on that day
             if '404' in str(ex):
                 return []
+            raise
 
         return [(self._db_episode_to_episode_info(show_info, r)) for r in raw_list]
 
