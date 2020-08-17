@@ -1,6 +1,8 @@
 import datetime
 import requests
 import time
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 from .data_classes import EpisodeInfo, ShowInfo
 from .setup_logger import getLogger
@@ -15,9 +17,29 @@ class TVDBClient:
         self.api_key = api_key
 
         # private
-        self._session = requests.Session()
+        self._session = self.__get_new_session()
         self._token = None
         self._token_death_time = 0
+
+    @classmethod
+    def __get_new_session(cls):
+        ''' gets a session that will auto-retry 500/504s '''
+        session = requests.Session()
+        RETRY_COUNT = 25
+        retry = Retry(
+            total=RETRY_COUNT,
+            read=RETRY_COUNT,
+            connect=RETRY_COUNT,
+            status=RETRY_COUNT,
+            redirect=RETRY_COUNT,
+            backoff_factor=.00001,
+            status_forcelist=(500, 504),
+            method_whitelist=False, # retry on any method matching above status codes
+        )
+        adapter = HTTPAdapter(max_retries=retry)
+        session.mount('http://', adapter)
+        session.mount('https://', adapter)
+        return session
 
     def _authenticate(self):
         logger.debug("Attempting authentication")
