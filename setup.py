@@ -7,7 +7,7 @@ setup(
     author='csm10495',
     author_email='csm10495@gmail.com',
     url='https://github.com/csm10495/tvdb_rss',
-    version='0.0.9',
+    version='0.0.10',
     packages=['tvdb_rss'],
     license='MIT License',
     python_requires='>=3.7',
