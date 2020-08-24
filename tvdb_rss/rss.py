@@ -1,4 +1,5 @@
 import datetime
+import multiprocessing
 import multiprocessing.dummy
 from .setup_logger import getLogger
 
@@ -11,23 +12,29 @@ class RSSGenerator:
         self.client = client
         self.config = config
 
-    def get_episodes_info(self, date=None, max_days_back=14):
+    def get_episodes_info(self, date=None, max_days_back=14, num_processes=multiprocessing.cpu_count() * 2):
         if date is None:
             date = datetime.datetime.today()
 
         shows_list = self.config.get_shows_list()
 
-        episodes_in_date_order = []
-        for days_back in range(max_days_back):
-            date_after_days_back = date - datetime.timedelta(days=days_back)
-            logger.debug(f"Looking for episodes released on: {date_after_days_back}")
-            for show_info in shows_list:
-                logger.debug(f"  Looking for show: {show_info.show_name}")
-                episodes_in_date_order.extend(self.client.get_episodes_by_first_air_date(show_info, date_after_days_back))
+        results = []
+        with multiprocessing.dummy.Pool(processes=num_processes) as pool:
+            for days_back in range(max_days_back):
+                date_after_days_back = date - datetime.timedelta(days=days_back)
+                logger.debug(f"Looking for episodes released on: {date_after_days_back}")
+                for show_info in shows_list:
+                    logger.debug(f"  Looking for show: {show_info.show_name}")
+                    results.append(pool.apply_async(self.client.get_episodes_by_first_air_date, args=(show_info, date_after_days_back)))
 
-        return episodes_in_date_order
+            episodes_in_date_order = []
 
-    def generate_rss_string(self, date=None, max_days_back=14):
+            for i in results:
+                episodes_in_date_order.extend(i.get())
+
+            return episodes_in_date_order
+
+    def get_rss_object(self, date=None, max_days_back=14):
         episodes_in_data_order = self.get_episodes_info(date, max_days_back)
         fg = FeedGenerator()
         fg.id('')
@@ -48,4 +55,8 @@ class RSSGenerator:
             image_html = f'<img src="{episode_info.get_available_image()}" title="{episode_info.episode_description}"/>'
             fe.description(image_html)
 
+        return fg
+
+    def generate_rss_string(self, date=None, max_days_back=14):
+        fg = self.get_rss_object(date, max_days_back)
         return fg.rss_str(pretty=True).decode()

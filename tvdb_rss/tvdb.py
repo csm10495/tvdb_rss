@@ -33,7 +33,7 @@ class TVDBClient:
             status=RETRY_COUNT,
             redirect=RETRY_COUNT,
             backoff_factor=.00001,
-            status_forcelist=(500, 504),
+            status_forcelist=(500, 502, 504),
             method_whitelist=False, # retry on any method matching above status codes
         )
         adapter = HTTPAdapter(max_retries=retry)
