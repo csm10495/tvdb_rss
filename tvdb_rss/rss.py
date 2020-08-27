@@ -1,3 +1,4 @@
+import collections
 import datetime
 import multiprocessing
 import multiprocessing.dummy
@@ -33,6 +34,17 @@ class RSSGenerator:
                 episodes_in_date_order.extend(i.get())
 
             return episodes_in_date_order
+
+    def get_episodes_info_grouped_by_first_aired_day(self, *args, **kwargs):
+        ''' args are passed to get_episodes_info(). Ordering is sooner to later '''
+        episodes_info = reversed(self.get_episodes_info(*args, **kwargs))
+        day_title_to_eps = collections.defaultdict(list)
+
+        for ep in episodes_info:
+            day_title = ep.first_aired.strftime("%A %D")
+            day_title_to_eps[day_title].append(ep)
+
+        return day_title_to_eps
 
     def get_rss_object(self, date=None, max_days_back=14):
         episodes_in_data_order = self.get_episodes_info(date, max_days_back)
