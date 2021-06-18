@@ -105,7 +105,7 @@ class TVDBClient:
             show_info=show_info,
             episode_season=raw['airedSeason'],
             episode_number=raw['airedEpisodeNumber'],
-            first_aired=datetime.datetime.fromisoformat(raw['firstAired']),
+            first_aired=datetime.datetime.fromisoformat(raw['firstAired']) if raw['firstAired'] else None,
             episode_title=raw['episodeName'],
             episode_description=raw['overview'],
             info_link=f'https://thetvdb.com/series/{show_info.show_name}/episodes/{raw["id"]}',

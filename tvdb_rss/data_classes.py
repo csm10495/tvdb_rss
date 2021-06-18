@@ -1,4 +1,5 @@
 import datetime
+import typing
 
 from dataclasses import dataclass
 
@@ -14,7 +15,7 @@ class EpisodeInfo:
     show_info: ShowInfo
     episode_season: int
     episode_number: int
-    first_aired: datetime.datetime
+    first_aired: typing.Optional[datetime.datetime]
     episode_title: str = ''
     episode_description: str = ''
     info_link: str = ''
